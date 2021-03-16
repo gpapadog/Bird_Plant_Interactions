@@ -36,7 +36,13 @@ plotting to be ordered by taxonomic information. Getting the correct order is ne
 to visually investigate whether posterior probabilities of interaction are taxonomically
 structured.
 
-- 2a_analysis.R: The main code for performing the analysis using the proposed method.
+- 2a_analysis.R: The main code for performing the analysis using the proposed method. We suggest
+running three chains of the MCMC in parallel. You will need to create a folder where analysis
+results should be saved.
+
+- 2b_analysis_covs.R: The code for performing the analysis using the method that employs the
+covariates directly.
+
 
 ### References
 

@@ -1,9 +1,4 @@
-# Analyzing the birds and plants data
-#
-# Created: August 5, 2020.
-
-rm(list = ls())
-dev.off()
+# Analyzing the birds and plants data using the proposed method.
 
 # Where the processed data are saved:
 data_path <- '~/Github/Birds_and_plants/Application/Data/Aves_analysis/'
