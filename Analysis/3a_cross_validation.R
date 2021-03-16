@@ -1,61 +1,52 @@
-# Performing cross-validation of bird-plant interaction models.
-# Created: October 12, 2020.
+# Performing cross-validation using the proposed bird-plant interaction model.
 
-rm(list = ls())
-dev.off()
+# Where the processed data are saved:
+data_path <- 'Data/'
+# Where you want to save MCMC results:
+save_path <- 'Results/'
+# Where the functions are available:
+source_path <- 'HelperScripts/'
+
 
 # ------ STEP 0: Some functions. --------- #
 
-source('~/Github/Birds_and_plants/functions/UpdExtraVar_function.R')
-source('~/Github/Birds_and_plants/functions/UpdTraitCoef_function.R')
-source('~/Github/Birds_and_plants/functions/UpdLatFac_function.R')
-source('~/Github/Birds_and_plants/functions/UpdProbObs_function.R')
-source('~/Github/Birds_and_plants/functions/UpdRho_function.R')
-source('~/Github/Birds_and_plants/functions/OmegaFromV_function.R')
-source('~/Github/Birds_and_plants/functions/useful_functions.R')
-source('~/Github/Birds_and_plants/functions/CorrMat_function.R')
-source('~/Github/Birds_and_plants/functions/MCMC_function.R')
-source('~/Github/Birds_and_plants/functions/PredictInteractions_function.R')
-source('~/Github/Birds_and_plants/functions/GetPredLatFac_function.R')
-source('~/Github/Birds_and_plants/functions/GetPredWeights_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/PredPower_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/AllPredPower_function.R')
+source(paste0(source_path, 'UpdExtraVar_function.R'))
+source(paste0(source_path, 'UpdTraitCoef_function.R'))
+source(paste0(source_path, 'UpdLatFac_function.R'))
+source(paste0(source_path, 'UpdProbObs_function.R'))
+source(paste0(source_path, 'UpdRho_function.R'))
+source(paste0(source_path, 'OmegaFromV_function.R'))
+source(paste0(source_path, 'useful_functions.R'))
+source(paste0(source_path, 'CorrMat_function.R'))
+source(paste0(source_path, 'MCMC_function.R'))
+source(paste0(source_path, 'PredictInteractions_function.R'))
+source(paste0(source_path, 'GetPredLatFac_function.R'))
+source(paste0(source_path, 'GetPredWeights_function.R'))
+
 
 # --------------------------------------------------------------- #
 
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/Cu.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/Cv.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_A.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_n.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_W.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_X.dat')
+# Loading the data:
+load(paste0(data_path, 'Cu.dat'))
+load(paste0(data_path, 'Cv.dat'))
+load(paste0(data_path, 'obs_A.dat'))
+load(paste0(data_path, 'obs_n.dat'))
+load(paste0(data_path, 'obs_W.dat'))
+load(paste0(data_path, 'obs_X.dat'))
 
+# Sample sizes of the two sets of species:
 nB <- nrow(Cu)
 nP <- nrow(Cv)
 
+
 # -------------- STEP 1: Specifications. ------------ #
 
-in_sample_mcmc <- FALSE
 bias_cor <- TRUE
 
-
-# ------------- STEP 2: Setting some interactions to out of sample ------------ #
-
-set.seed(1234)
-set_out <- matrix(0, nrow = nB, ncol = nP)
-set_out[sample(which(obs_A == 1), 100)] <- 1
-
-# Zero-ing out corresponding entries in A.
-use_A <- obs_A
-use_A[which(set_out == 1)] <- 0
-
-
-# STEP 3: MCMC specifications.
-
-Nsims <- 1000
-burn <- 3
-thin <- 2
-use_H <- 5
+Nsims <- 600
+burn <- 20000
+thin <- 20
+use_H <- 10
 theta_inf <- 0.01
 mh_n_pis <- 100  # Parameter for proposal in Metropolis-Hastings for pi update.
 mh_n_pjs <- 100
@@ -70,38 +61,58 @@ prior_mu0 <- 0
 prior_sigmasq0 <- 10
 prior_sigmasq <- c(1, 1)
 
-
 start_values <- NULL
 sampling <- NULL
 
 
-# STEP 4: MCMC.
+# ------------- STEP 2: Setting some interactions to out of sample ------------ #
 
-mcmc <- MCMC(obs_A = use_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
-             Cu = Cu, Cv = Cv, Nsims = Nsims, burn = burn, thin = thin,
-             use_H = use_H, bias_cor = bias_cor,
-             theta_inf = theta_inf, mh_n_pis = mh_n_pis,
-             mh_n_pjs = mh_n_pjs, mh_n_rho = mh_n_rho,
-             stick_alpha = stick_alpha, prior_theta = prior_theta,
-             prior_tau = prior_tau, prior_rho = prior_rho,
-             prior_mu0 = prior_mu0, prior_sigmasq0 = prior_sigmasq0,
-             prior_sigmasq = prior_sigmasq, start_values = start_values,
-             sampling = sampling)
+# We highly recommend running the following code in parallel on 20 machines.
+
+repetitions <- 20
 
 
-pred <- matrix(NA, nrow = Nsims, ncol = 100)
-colnames(pred) <- 1 : 100
-wh <- which(set_out == 1)
+for (rr in 1  : repetitions) {
+  
+  set.seed(rr)
+  
+  # Matrix that chooses 100 recorded interactions:
+  set_out <- matrix(0, nrow = nB, ncol = nP)
+  set_out[sample(which(obs_A == 1), 100)] <- 1  
+  
+  # Zero-ing out corresponding entries in A.
+  use_A <- obs_A
+  use_A[which(set_out == 1)] <- 0  
+  
 
-for (ii in 1 : 100) {
-  row_ii <- wh[ii] %% nB
-  row_ii <- ifelse(row_ii == 0, nB, row_ii)
-  col_ii <- ceiling(wh[ii] / nB)
-  if (set_out[row_ii, col_ii] == 0) {
-    warning('something is wrong here')
+  # Running the MCMC with the new recorded interaction matrix:
+  mcmc <- MCMC(obs_A = use_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
+               Cu = Cu, Cv = Cv, Nsims = Nsims, burn = burn, thin = thin,
+               use_H = use_H, bias_cor = bias_cor,
+               theta_inf = theta_inf, mh_n_pis = mh_n_pis,
+               mh_n_pjs = mh_n_pjs, mh_n_rho = mh_n_rho,
+               stick_alpha = stick_alpha, prior_theta = prior_theta,
+               prior_tau = prior_tau, prior_rho = prior_rho,
+               prior_mu0 = prior_mu0, prior_sigmasq0 = prior_sigmasq0,
+               prior_sigmasq = prior_sigmasq, start_values = start_values,
+               sampling = sampling)
+  
+  # Saving the predictions:
+  pred <- apply(mcmc$Ls, c(2, 3), mean)
+  save(pred, file = paste0(save_path, 'pred_', repetition, '.dat'))
+  rm(pred)
+  
+  # Saving the indices of interactions that were held out:
+  cv_indices <- matrix(NA, nrow = 100, ncol = 2)
+  wh <- which(set_out == 1)
+  for (ii in 1 : 100) {
+    row_ii <- wh[ii] %% nB
+    row_ii <- ifelse(row_ii == 0, nB, row_ii)
+    col_ii <- ceiling(wh[ii] / nB)
+    cv_indices[ii, ] <- c(row_ii, col_ii)
   }
-  pred[, ii] <- mcmc$Ls[, row_ii, col_ii]
-  colnames(pred)[ii] <- paste0(row_ii, ', ', col_ii)
+  save(cv_indices, file = paste0(save_path, 'cv_indices_', repetition, '.dat'))
+  rm(cv_indices)
 }
-
+  
 
