@@ -21,16 +21,22 @@ folder Analysis/. Each file is commented heavily. The numbers in the beginning o
 represent the order with which the files should be used/ran. A short description of each file is
 included here. 
 
--- 0_Bias_visualization.R: This code can be used to replicate Figure 1 of the manuscript where we
+- 0_Bias_visualization.R: This code can be used to replicate Figure 1 of the manuscript where we
 visualize the geographic and taxonomic biases of the individual studies. This code is not
 necessary to be run for the remaining analyses.
 
--- 1_Aves_subset_data.R: This code MUST be run before any subsequent analysis. This code loads
+- 1a_Aves_subset_data.R: This code MUST be run before any subsequent analysis. This code loads
 the data and processes them into matrices and data frames that can be used in subsequent analysis.
 The processed data need to be saved to a local directory. That directory can be specified at the
 beginning of the code.
 
---
+- 1b_get_order.R: This code MUST be run in order to be able to plot the analysis results later.
+This code acquires the order with which the bird and plant species should be plotted if we want
+plotting to be ordered by taxonomic information. Getting the correct order is necessary in order
+to visually investigate whether posterior probabilities of interaction are taxonomically
+structured.
+
+- 2a_analysis.R: The main code for performing the analysis using the proposed method.
 
 ### References
 
