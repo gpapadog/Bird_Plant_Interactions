@@ -1,15 +1,18 @@
 # Analyzing the birds and plants data with a model that uses the covariates.
 
+# The directory where the analysis is performed:
+wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
-data_path <- '~/Github/Birds_and_plants/Application/Data/Aves_analysis/'
+data_path <- 'Data/'
 # Where you want to save MCMC results:
-save_path <- '~/Github/Birds_and_plants/Application/Results/'
+save_path <- 'Results/'
 # Where the functions are available:
-source_path <- '~/Github/BiasedNetwork/R/'
+source_path <- 'HelperScripts/'
 
 
 # ------ STEP 0: Some functions. --------- #
 
+setwd(wd_path)
 source(paste0(source_path, 'useful_functions.R'))
 source(paste0(source_path, 'UpdProbObs_function.R'))
 source(paste0(source_path, 'ModelCovariates_function.R'))

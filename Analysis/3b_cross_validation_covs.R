@@ -1,6 +1,8 @@
 # Performing cross-validation of bird-plant interaction models based on the
 # model that depends directly on covariates.
 
+# The directory where the analysis is performed:
+wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
 data_path <- 'Data/'
 # Where the functions are available:
@@ -10,6 +12,7 @@ result_path <- 'Results/'
 
 # ------ STEP 0: Some functions. --------- #
 
+setwd(wd_path)
 source(paste0(source_path, 'useful_functions.R'))
 source(paste0(source_path, 'UpdProbObs_function.R'))
 source(paste0(source_path, 'ModelCovariates_function.R'))

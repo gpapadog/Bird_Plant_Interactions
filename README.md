@@ -55,7 +55,13 @@ Code for cross-validation based on the model that uses covariates directly.
 
 - 5_plot_results.R: Code that plots all the results that are shown in the manuscript.
 
-### References
+### Note
+
+For replicating the analysis results in this code, you will need to specify a directory where
+results from the individual studies can be saved. We recommend you create a folder at the same
+level as the Analysis/, Data/, and HelperScripts/ folders that is named Results/.
+
+## References
 
 Bello, C., Galetti, M., Montan, D., Pizo, M. A., Mariguela, T. C., Culot, L.,
 Bufalo, F., Labecca, F., Pedrosa, F., Constantini, R., Emer, C., Silva, W.

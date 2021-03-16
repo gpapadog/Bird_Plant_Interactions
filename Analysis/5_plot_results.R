@@ -1,3 +1,5 @@
+# The directory where the analysis is performed:
+wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
 data_path <- 'Data/'
 # Where the results are saved:
@@ -11,6 +13,7 @@ library(superheat)
 library(abind)
 library(gridExtra)
 library(grid)
+setwd(wd_path)
 
 # Loading the data:
 load(paste0(data_path, 'Cu.dat'))

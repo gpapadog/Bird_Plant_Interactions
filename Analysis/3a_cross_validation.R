@@ -1,5 +1,7 @@
 # Performing cross-validation using the proposed bird-plant interaction model.
 
+# The directory where the analysis is performed:
+wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
 data_path <- 'Data/'
 # Where you want to save MCMC results:
@@ -10,6 +12,7 @@ source_path <- 'HelperScripts/'
 
 # ------ STEP 0: Some functions. --------- #
 
+setwd(wd_path)
 source(paste0(source_path, 'UpdExtraVar_function.R'))
 source(paste0(source_path, 'UpdTraitCoef_function.R'))
 source(paste0(source_path, 'UpdLatFac_function.R'))

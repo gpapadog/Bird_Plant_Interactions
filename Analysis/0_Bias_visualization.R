@@ -4,14 +4,14 @@
 
 # The directory where the analysis is performed:
 wd_path <- 'Bird_Plant_Interactions/'
-# The directory where the original data are:
-data_path <- 'Bird_Plant_Interactions/Data/'
+# The directory within the working directory where the data are:
+data_path <- 'Data/'
 
 
 library(data.table)
 library(ggmap)
 library(ggplot2)
-
+setwd(wd_path)
 
 # ---------- PART A: Loading in the data -------------- #
 

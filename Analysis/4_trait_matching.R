@@ -1,5 +1,7 @@
 # Performing cross-validation of bird-plant interaction models.
 
+# The directory where the analysis is performed:
+wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
 data_path <- '~/Github/Birds_and_plants/Application/Data/Aves_analysis/'
 # Where the MCMC results are saved and the trait matching will be saved:
@@ -10,6 +12,7 @@ source_path <- '~/Github/BiasedNetwork/R/'
 
 # ------ STEP 0: Some functions. --------- #
 
+setwd(wd_path)
 source(paste0(source_path, 'TraitMatching2_function.R'))
 source(paste0(source_path, 'useful_functions.R'))
 

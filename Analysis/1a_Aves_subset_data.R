@@ -5,9 +5,9 @@
 # The directory where the analysis is performed:
 wd_path <- 'Bird_Plant_Interactions/'
 # The directory where the original data are:
-data_path <- 'Bird_Plant_Interactions/Data/'
+data_path <- 'Data/'
 # The directory where the processed data should be saved:
-save_path <- 'Bird_Plant_Interactions/Data/'
+save_path <- 'Data/'
 # Whether the processed data should be saved or not:
 save_files <- TRUE
 
