@@ -220,31 +220,31 @@ apply(all_cor, 2, quantile, probs = c(0.025, 0.975))
 
 # Getting the results together (held out indicies and predictions)
 all_indices <- array(NA, dim = c(repetitions, 100, 2))
-our_pred <- array(NA, dim = c(repetitions, nB, nP))
-alt_pred <- array(NA, dim = c(repetitions, nB, nP))
+our_preds <- array(NA, dim = c(repetitions, nB, nP))
+alt_preds <- array(NA, dim = c(repetitions, nB, nP))
 
 for (rr in 1 : repetitions) {
   load(paste0(result_path, 'cv_indices_', rr, '.dat'))
   load(paste0(result_path, 'pred_', rr, '.dat'))
   load(paste0(result_path, 'alt_pred_', rr, '.dat'))
   all_indices[rr, , ] <- cv_indices
-  our_pred[rr, , ] <- pred
-  alt_pred[rr, , ] <- alt_pred
+  our_preds[rr, , ] <- pred
+  alt_preds[rr, , ] <- alt_pred
 }
 
 # Predictions of the held out data from both models:
 pred <- array(NA, dim = c(repetitions, 100, 2))
 for (rr in 1 : repetitions) {
   for (ii in 1 : 100) {
-    pred[rr, ii, 1] <- use_cv[rr, cv_indices[bb, ii, 1], cv_indices[rr, ii, 2]]
-    pred[rr, ii, 2] <- alt_cv[rr, cv_indices[bb, ii, 1], cv_indices[rr, ii, 2]]
+    pred[rr, ii, 1] <- our_preds[rr, all_indices[rr, ii, 1], all_indices[rr, ii, 2]]
+    pred[rr, ii, 2] <- alt_preds[rr, all_indices[rr, ii, 1], all_indices[rr, ii, 2]]
   }
 }
 
 # Average and median probability of interaction based on the two models in the
 # overall data:
-overall_mean <- cbind(apply(our_pred, 1, mean), apply(alt_pred, 1, mean))
-overall_median <- cbind(apply(our_pred, 1, median), apply(alt_pred, 1, median))
+overall_mean <- cbind(apply(our_preds, 1, mean), apply(alt_preds, 1, mean))
+overall_median <- cbind(apply(our_preds, 1, median), apply(alt_preds, 1, median))
 
 # Average and median in the held out data.
 pred_mean <- apply(pred, c(1, 3), mean)

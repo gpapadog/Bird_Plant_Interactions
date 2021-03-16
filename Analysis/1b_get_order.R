@@ -127,7 +127,7 @@ family_info <- dta[, list(Frug_Order = Frug_Order[1],
                           Frug_Genus = Frug_Genus[1]), by = Frugivore_Species]
 bird_order_info <- merge(bird_order_info, family_info, by.x = 'Species', by.y = 'Frugivore_Species', sort = FALSE)
 if (save_files) {
-  save(bird_order_info, file = paste(save_path, 'bird_order_info.dat'))
+  save(bird_order_info, file = paste0(save_path, 'bird_order_info.dat'))
 }
 
 

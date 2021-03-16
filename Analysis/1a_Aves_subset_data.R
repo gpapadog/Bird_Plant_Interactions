@@ -305,7 +305,6 @@ colnames(obs_W) <- c('logFruitDiam', 'logFruitLen', 'LogSeedDiam', 'LogSeedLen',
                      'YellowOrangeFruit', 'GreenFruit', 'LipidIs1',
                      'IsEndagered')
 
-apply(obs_W, 2, function(x) mean(is.na(x)))
 if (save_files) {
   save(obs_W, file = paste0(save_path, 'obs_W.dat'))
 }

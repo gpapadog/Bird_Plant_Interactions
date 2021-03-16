@@ -3,11 +3,11 @@
 # The directory where the analysis is performed:
 wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
-data_path <- '~/Github/Birds_and_plants/Application/Data/Aves_analysis/'
+data_path <- 'Data/'
 # Where the MCMC results are saved and the trait matching will be saved:
-save_path <- '~/Github/Birds_and_plants/Application/Results/'
+save_path <- 'Results/'
 # Where the functions are available:
-source_path <- '~/Github/BiasedNetwork/R/'
+source_path <- 'HelperScripts/'
 
 
 # ------ STEP 0: Some functions. --------- #
@@ -57,7 +57,7 @@ for (cc in 1 : 3) {
 # Dealing with extreme values for which logit(x) is infinite.
 mod_pL1s[mod_pL1s > 1 - 10^{-10}] <- 1 - 10^{-10}
 
-trait_match <- TraitMatching2(B = 500, mod_pL1s = use_mod_pL1s,
+trait_match <- TraitMatching2(B = 500, mod_pL1s = mod_pL1s,
                               Xs = NULL, Ws = NULL,  # Imputed values not used.
                               obs_X = obs_X, obs_W = obs_W, obs_only = TRUE)
 
