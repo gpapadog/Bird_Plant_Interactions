@@ -1,29 +1,33 @@
 # Performing cross-validation of bird-plant interaction models based on the
 # model that depends directly on covariates.
-#
-# Created: October 12, 2020.
 
-rm(list = ls())
-dev.off()
+# Where the processed data are saved:
+data_path <- 'Data/'
+# Where the functions are available:
+source_path <- 'HelperScripts/'
+# Where the results should be saved:
+result_path <- 'Results/'
 
 # ------ STEP 0: Some functions. --------- #
 
-source('~/Github/Birds_and_plants/functions/useful_functions.R')
-source('~/Github/Birds_and_plants/functions/UpdProbObs_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/ModelCovariates_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/GenDataCovariates_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/PredPower_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/AllPredPower_function.R')
+source(paste0(source_path, 'useful_functions.R'))
+source(paste0(source_path, 'UpdProbObs_function.R'))
+source(paste0(source_path, 'ModelCovariates_function.R'))
 
 # --------------------------------------------------------------- #
 
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/Cu.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/Cv.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_A.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_n.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_W.dat')
-load('~/Github/Birds_and_plants/Application/Data/Aves_analysis/obs_X.dat')
+# Loading the data:
+load(paste0(data_path, 'Cu.dat'))
+load(paste0(data_path, 'Cv.dat'))
+load(paste0(data_path, 'obs_A.dat'))
+load(paste0(data_path, 'obs_n.dat'))
+load(paste0(data_path, 'obs_W.dat'))
+load(paste0(data_path, 'obs_X.dat'))
 
+# Excluding the two variables with the highest missingness
+obs_W <- obs_W[, - c(4, 12)]
+
+# Sample sizes of the two sets of species:
 nB <- nrow(Cu)
 nP <- nrow(Cv)
 
@@ -31,23 +35,9 @@ nP <- nrow(Cv)
 
 bias_cor <- TRUE
 
-
-# ------------- STEP 2: Setting some interactions to out of sample ------------ #
-
-set.seed(1234)
-set_out <- matrix(0, nrow = nB, ncol = nP)
-set_out[sample(which(obs_A == 1), 100)] <- 1
-
-# Zero-ing out corresponding entries in A.
-use_A <- obs_A
-use_A[which(set_out == 1)] <- 0
-
-
-# ------------- STEP 3: MCMC specifications. ------------ #
-
-Nsims <- 1000
-burn <- 300
-thin <- 2
+Nsims <- 600
+burn <- 20000
+thin <- 20
 mh_n_pis <- 100  # Parameter for proposal in Metropolis-Hastings for pi update.
 mh_n_pjs <- 100
 
@@ -60,29 +50,38 @@ start_values <- NULL
 sampling <- NULL
 
 
-# ------------- STEP 4: MCMC. ------------ #
+# ------------- STEP 2: Setting some interactions to out of sample ------------ #
 
-mcmc <- ModelCovariates(obs_A = use_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
-                        Nsims = Nsims, burn = burn, thin = thin, bias_cor = bias_cor,
-                        mh_n_pis = mh_n_pis, mh_n_pjs = mh_n_pjs, prior_mu0 = prior_mu0,
-                        prior_sigmasq0 = prior_sigmasq0, prior_sigmasq = prior_sigmasq,
-                        start_values = start_values, sampling = sampling)
+# We highly recommend running the following code in parallel on 20 machines.
+
+repetitions <- 20
 
 
-
-pred <- matrix(NA, nrow = Nsims, ncol = 100)
-colnames(pred) <- 1 : 100
-wh <- which(set_out == 1)
-
-for (ii in 1 : 100) {
-  row_ii <- wh[ii] %% nB
-  row_ii <- ifelse(row_ii == 0, nB, row_ii)
-  col_ii <- ceiling(wh[ii] / nB)
-  if (set_out[row_ii, col_ii] == 0) {
-    warning('something is wrong here')
-  }
-  pred[, ii] <- mcmc$Ls[, row_ii, col_ii]
-  colnames(pred)[ii] <- paste0(row_ii, ', ', col_ii)
+for (rr in 1  : repetitions) {
+  
+  set.seed(rr)
+  
+  # Matrix that chooses 100 recorded interactions:
+  set_out <- matrix(0, nrow = nB, ncol = nP)
+  set_out[sample(which(obs_A == 1), 100)] <- 1  
+  
+  # Zero-ing out corresponding entries in A.
+  use_A <- obs_A
+  use_A[which(set_out == 1)] <- 0  
+  
+  
+  # Running the MCMC with the new recorded interaction matrix:
+  set.seed(rr)
+  mcmc <- ModelCovariates(obs_A = use_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
+                          Nsims = Nsims, burn = burn, thin = thin, bias_cor = bias_cor,
+                          mh_n_pis = mh_n_pis, mh_n_pjs = mh_n_pjs, prior_mu0 = prior_mu0,
+                          prior_sigmasq0 = prior_sigmasq0, prior_sigmasq = prior_sigmasq,
+                          start_values = start_values, sampling = sampling)
+  
+  alt_pred <- apply(mcmc$Ls, c(2, 3), mean)
+  
+  save(alt_pred, file = paste0(save_path, 'alt_pred_', rr, '.dat'))
+  rm(alt_pred)
+  
 }
-
 
