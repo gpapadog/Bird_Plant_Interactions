@@ -7,11 +7,12 @@ modeling to account for truly possible but unrecorded interactions. We also acco
 covariates to improve efficiency. Finally, we employ an approach to trait matching which allows us
 to identify the traits that are most inflential in forming and detecting species interactions.
 
-## Data set
+### Data set
 
 The data we are using is publicly available in the supporting information of Bello et al (2016).
 The link is provided at the references of this file. The downloaded file is a .csv file and it is
-named ATLANTIC_frugivory.csv.
+named ATLANTIC_frugivory.csv. The data set is also included in the Data/ folder along with a short
+data directory.
 
 
 
