@@ -43,6 +43,12 @@ results should be saved.
 - 2b_analysis_covs.R: The code for performing the analysis using the method that employs the
 covariates directly.
 
+- 3a
+
+- 3b
+
+- 4_trait_matching.R: Performing the trait matching algorithm of the manuscript for our data.
+
 
 ### References
 
