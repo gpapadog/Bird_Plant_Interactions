@@ -7,19 +7,21 @@ modeling to account for truly possible but unrecorded interactions. We also acco
 covariates to improve efficiency. Finally, we employ an approach to trait matching which allows us
 to identify the traits that are most inflential in forming and detecting species interactions.
 
-### Data set
+## Data set
 
 The data we are using is publicly available in the supporting information of Bello et al (2016).
 The link is provided at the references of this file. The downloaded file is a .csv file and it is
 named ATLANTIC_frugivory.csv. The data set is also included in the Data/ folder along with a short
 data directory.
 
-### Code
+## Code
+
+The folder HelperScripts/ includes functions that are used in the analysis code.
 
 The code to replicate the visualizations and analysis in the manuscript are available in the
-folder Analysis/. Each file is commented heavily. The numbers in the beginning of the file names
-represent the order with which the files should be used/ran. A short description of each file is
-included here. 
+folder Analysis/. The numbers in the beginning of the file names represent the order with which
+the files should be used/ran. A short description of each file is included here. Each file is
+commented heavily.
 
 - 0_Bias_visualization.R: This code can be used to replicate Figure 1 of the manuscript where we
 visualize the geographic and taxonomic biases of the individual studies. This code is not
@@ -43,12 +45,15 @@ results should be saved.
 - 2b_analysis_covs.R: The code for performing the analysis using the method that employs the
 covariates directly.
 
-- 3a
+- 3a_cross_validation.R: Performing cross validation by helding out recorded interactions.
+Code for cross-validation based on our method.
 
-- 3b
+- 3b_cross_validation_covs.R: Performing cross validation by helding out recorded interactions.
+Code for cross-validation based on the model that uses covariates directly.
 
 - 4_trait_matching.R: Performing the trait matching algorithm of the manuscript for our data.
 
+- 5_plot_results.R: Code that plots all the results that are shown in the manuscript.
 
 ### References
 
