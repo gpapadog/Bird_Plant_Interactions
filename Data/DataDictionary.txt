@@ -1,49 +1,59 @@
--------------------------------------------------------------------------------
----------------------- Data dictionary for fullData.dat -----------------------
--------------------------------------------------------------------------------
-
-fullData.dat contains a list with 4 elements
-	- proactive
-	- misdemeanor
-	- violent
- 	- disparities
-
-Each of these is a list that has all the data needed to run analyses for each 
-of four outcomes: proactive arrests, misdemeanor arrests, violent crimes, and
-racial disparities in proactive arrest rates.
-
-Each of these lists contains the following elements
-
-- outcomes		(an N by T matrix of outcomes for each precinct at each time point)
-- treatments		(an N by T matrix of indicators of whether each precinct 
-	      		had adopted neighborhood policing at this point in time
-- covariates		(an N by P matrix of precinct-specific covariates)
-- startTimes		(a vector of start times of neighborhood policing for
-			each precinct)
-- df			(degrees of freedom to be used for mean function of time)
-- pairs			(a matrix of indices of precincts that are neighbors)
-- zeroMat		(a matrix of pairs of precincts we will force to be conditionally
-			independent on each other in estimate of sigma because they are not
-			neighbors)
-- precinctNumber	(a vector of precinct numbers for each precinct)
-- sdSave		(this is only for the disparities outcome, and contains the standard
-			deviation of the outcome within each precinct so that we can scale
-			and re-scale the outcome accordingly to improve computation)	
+-------------------------------------------------------------------------------------------
+---------------------- Data dictionary for ATLANTIC_frugivory.csv -------------------------
+-------------------------------------------------------------------------------------------
 
 
--------------------------------------------------------------------------------
----------- Data dictionary for the precinct-specific covariates ---------------
--------------------------------------------------------------------------------
+This file includes a description of the data included in the file ATLANTIC_frugivory.csv.
+We note that the data are publicly available with the data paper referenced here:
 
-punemp                           Percent unemployed
-plat                             Percent Latino
-pblk                             Percent black
-pbaplus                          Percent of people 25+ who have a BA or higher
-ppov                             Percent of people living below the poverty line
-pvhu                             Percent vacant housing units
-poohu                            Percent owner-occupied housing units
-pfb                              Percent foreign born
-pym                              Percent young (15-34) men
+Bello, C., Galetti, M., Montan, D., Pizo, M. A., Mariguela, T. C., Culot, L., Bufalo, F.,
+Labecca, F., Pedrosa, F., Constantini, R., Emer, C., Silva, W. R., da Silva, F. R.,
+Ovaskainen, O., & Jordano, P. (2017). Atlantic frugivory: A plant-frugivore interaction data
+set for the Atlantic Forest. Ecology, 98(6), 1729. https://doi.org/10.1002/ecy.1818
+
+The supplementary material of the data paper above includes a detailed description of the
+data, that is more detailed than the one provided here, see the link below:
+
+https://esajournals.onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1002%2Fecy.1818&file=ecy1818-sup-0001-MetadataS1.pdf
+
+The data are in the form of a matrix where each row is a record of an observed interaction
+between an frugivore and a plant species. The columns correspond to:
+
+ID ------------------------ A unique ID for each interaction.
+Frugivore_Species --------- The frugivore species that participates in the interaction.
+Plant_Species	------------- The plant species that participates in the interaction.					
+Type of Interaction ------- Only mutualistic interactions are included in the data.
+Plant_family --------------	Taxonomic family that the plant species belongs to.
+Plant_genus --------------- Taxonomic genus that the plant species belongs to.
+Plant_specific.epiteth ---- Taxonomic classification of species.
+Plant_distribution -------- The Brazilian states were the plant has been reported.
+Plant_origin -------------- Whether the plant is native or introduced.
+Plant_Form ---------------- The form of the plant, for example, tree or scrub.
+fruit_diameter ------------ The diameter of the plant fruit in millimeters.
+fruit_length -------------- The length of the plant fruit in millimeters.
+seed_diameter ------------- The diameter of the seed in millimeters.
+seed_length --------------- The length of the seed in millimeters.
+Fruit_color --------------- Color of the plant fruit, e.g, red, yellow.
+Lipid_Score --------------- Low to high lipid concentration (values 1, 2, 3).
+Plants_IUCN --------------- IUCN * classification for threatened species.
+Frug_Class ---------------- Frugivore species class taxonomic classification.
+Frug_Order ---------------- Frugivore species order taxonomic classification.
+Frug_Family --------------- Frugivore species family taxonomic classification.
+Frug_Genus ---------------- Frugivore species genus taxonomic classification.
+Frug_Epitetus ------------- Taxonomic classification for frugivore species.
+Frug_Group ---------------- Major type of frugivore species.
+Frug_Body_Mass ------------ Frugivore body mass in grams.
+Frug_Mean_Gape_Size ------- Frugivore gape length in millimeters.
+Frugivory_score ----------- Low to high frugivore reliance on fruits (values 1, 2, 3).
+Frug_Migration_status ----- Migration status (resident/migrant)
+Frug_IUCN ----------------- IUCN * classification for threatened species.Frug_Population_Trend ----- Trend of frugivore population.
+Study_Location ------------ Location of the study that recorded the interaction.
+Latitude ------------------ Coordinates.
+Longitude ----------------- Coordinates.
+Precision ----------------- Precision of the recorded coordinates.
+Study reference ----------- The reference of the study that recorded the interaction.
+Doi/Link ------------------ Link to the study if available.
+Study_Method -------------- Type of study (animal/plant oriented, network study).
 
 
--------------------------------------------------------------------------------
+*  IUCN: International Union for Conservation of Nature
