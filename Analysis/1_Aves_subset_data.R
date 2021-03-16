@@ -20,10 +20,6 @@ setwd(wd_path)
 
 # Loading libraries.
 library(data.table)
-library(rgdal)
-library(ggmap)
-library(ggplot2)
-library(sf)
 library(gplots)
 
 # ---------- PART A: Loading in the data -------------- #
