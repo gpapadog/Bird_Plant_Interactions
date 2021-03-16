@@ -270,9 +270,18 @@ ggplot(data = plot_dta) +
 
 # --------------- STEP 5: Variable importance measure ----------------- #
 
-load_files <- list.files('Output/4results/')
-for (x in load_files) load(paste0('Output/4results/', x))
 
+# ------- PART A: Plotting the variables in order of importance:
+
+load(paste0(result_path, 'rsq_obs_X.dat'))
+load(paste0(result_path, 'rsq_obs_W.dat'))
+load(paste0(result_path, 'rsq_resampling_X.dat'))
+load(paste0(result_path, 'rsq_resampling_W.dat'))
+
+
+# Calculating the number of permuted standard deviations away from the mean.
+
+# Starting from the bird covariates:
 wh_obs <- rsq_obs_X
 wh_resampling <- rsq_resampling_X
 sd_awayX <- rep(NA,  length(wh_obs))
@@ -281,6 +290,7 @@ for  (cc in 1 : length(wh_obs)) {
   sd_awayX[cc] <- (wh_obs[cc] - mean(wh_resampling[, cc])) / sd(wh_resampling[, cc])
 }
 
+# And for the plant covariates:
 wh_obs <- rsq_obs_W
 wh_resampling <- rsq_resampling_W
 sd_awayW <- rep(NA,  length(wh_obs))
@@ -290,8 +300,11 @@ for  (cc in 1 : length(wh_obs)) {
 }
 
 
-wh_covX <- 1 : 5
-xx <- data.frame(value = sd_awayX[wh_covX], covariate = names(sd_awayX)[wh_covX], y = 1)
+# Plotting the tiles of variable importance ordering the variables in
+# decreasing importance:
+
+# For the bird species:
+xx <- data.frame(value = sd_awayX, covariate = names(sd_awayX), y = 1)
 xx <- xx[order(- xx$value), ]
 xx$covariate <- factor(xx$covariate, levels = xx$covariate)
 
@@ -302,10 +315,8 @@ ggplot() + geom_tile(aes(x = covariate, y = y, fill = value), color = 'white', d
   scale_fill_gradient(low = '#BFF0B6', high = '#3B6E32') +
   theme(axis.text = element_text(angle = 0, hjust = 0.5, vjust = 0, size = 8))
 
-
-
-wh_covW <- 1 : 12
-ww <- data.frame(value = sd_awayW[wh_covW], covariate = names(sd_awayW)[wh_covW], y = 1)
+# For the plant species:
+ww <- data.frame(value = sd_awayW, covariate = names(sd_awayW), y = 1)
 ww <- ww[order(- ww$value), ]
 ww$covariate <- factor(ww$covariate, levels = ww$covariate)
 
@@ -319,26 +330,36 @@ ggplot() + geom_tile(aes(x = covariate, y = y, fill = value), color = 'white', d
 
 
 
-# ----------------------- STEP 6 -------------------------- #
-# -------- Plotting predictions against covariates -------- #
+# ------- PART B: Posterior probabilities based on the important covariates.
 
+# Taking the posterior probabilities of interaction across the three chains,
+# and setting the recorded interactions to NA:
 use_Ls <- do.call(abind, c(lapply(all_res, function(x) x$all_pred[, , , 1]), along = 1))
 use_mean_Ls <- apply(use_Ls, c(2, 3), mean)
 use_mean_Ls[obs_A == 1] <- NA
 
+# Which covariate is to be plotted. The ones we want are listed first.
 wh_X <- 1
 wh_W <- 1
 
+# Showing only the species that have the covariate measured.
 keep_birds <- which(!is.na(obs_X[, wh_X]))
 keep_plants <- which(!is.na(obs_W[, wh_W]))
 use_out <- use_mean_Ls[keep_birds, keep_plants]
 
+# Because some species have identical values for the covariate, in order for
+# plot to show all of them, we need to slightly pertube their values. That way,
+# the increasing or decreasing order is not altered, but there is no overlap in
+# the covariate values:
 bird_cov <- obs_X[keep_birds, wh_X]
 bird_cov <- bird_cov + rnorm(length(keep_birds), sd = sd(bird_cov) * 0.0001)
 plant_cov <- obs_W[keep_plants, wh_W]
 plant_cov <- plant_cov + rnorm(length(plant_cov), sd = sd(plant_cov) * 0.0001)
 
-
+# Creating a data frame in which the species are ordered by their covariate
+# values. This will allow us to plot the probability of interaction across the
+# covariates in an interpretable way. We also note that we need to turn the
+# covariates to factors in order for them to be plotted in the correct order.
 plot_dta <- data.frame(cov_bird = rep(bird_cov, length(keep_plants)),
                        cov_plant = rep(plant_cov, each = length(keep_birds)),
                        probability = as.numeric(use_out))
