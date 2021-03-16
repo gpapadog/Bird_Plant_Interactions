@@ -1,0 +1,49 @@
+-------------------------------------------------------------------------------
+---------------------- Data dictionary for fullData.dat -----------------------
+-------------------------------------------------------------------------------
+
+fullData.dat contains a list with 4 elements
+	- proactive
+	- misdemeanor
+	- violent
+ 	- disparities
+
+Each of these is a list that has all the data needed to run analyses for each 
+of four outcomes: proactive arrests, misdemeanor arrests, violent crimes, and
+racial disparities in proactive arrest rates.
+
+Each of these lists contains the following elements
+
+- outcomes		(an N by T matrix of outcomes for each precinct at each time point)
+- treatments		(an N by T matrix of indicators of whether each precinct 
+	      		had adopted neighborhood policing at this point in time
+- covariates		(an N by P matrix of precinct-specific covariates)
+- startTimes		(a vector of start times of neighborhood policing for
+			each precinct)
+- df			(degrees of freedom to be used for mean function of time)
+- pairs			(a matrix of indices of precincts that are neighbors)
+- zeroMat		(a matrix of pairs of precincts we will force to be conditionally
+			independent on each other in estimate of sigma because they are not
+			neighbors)
+- precinctNumber	(a vector of precinct numbers for each precinct)
+- sdSave		(this is only for the disparities outcome, and contains the standard
+			deviation of the outcome within each precinct so that we can scale
+			and re-scale the outcome accordingly to improve computation)	
+
+
+-------------------------------------------------------------------------------
+---------- Data dictionary for the precinct-specific covariates ---------------
+-------------------------------------------------------------------------------
+
+punemp                           Percent unemployed
+plat                             Percent Latino
+pblk                             Percent black
+pbaplus                          Percent of people 25+ who have a BA or higher
+ppov                             Percent of people living below the poverty line
+pvhu                             Percent vacant housing units
+poohu                            Percent owner-occupied housing units
+pfb                              Percent foreign born
+pym                              Percent young (15-34) men
+
+
+-------------------------------------------------------------------------------
