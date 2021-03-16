@@ -5,7 +5,7 @@ wd_path <- 'Bird_Plant_Interactions/'
 # Where the processed data are saved:
 data_path <- 'Data/'
 # Where you want to save MCMC results:
-save_path <- 'Results/'
+result_path <- 'Results/'
 # Where the functions are available:
 source_path <- 'HelperScripts/'
 
@@ -102,7 +102,7 @@ for (rr in 1  : repetitions) {
   
   # Saving the predictions:
   pred <- apply(mcmc$Ls, c(2, 3), mean)
-  save(pred, file = paste0(save_path, 'pred_', rr, '.dat'))
+  save(pred, file = paste0(result_path, 'pred_', rr, '.dat'))
   rm(pred)
   
   # Saving the indices of interactions that were held out:
@@ -114,7 +114,7 @@ for (rr in 1  : repetitions) {
     col_ii <- ceiling(wh[ii] / nB)
     cv_indices[ii, ] <- c(row_ii, col_ii)
   }
-  save(cv_indices, file = paste0(save_path, 'cv_indices_', rr, '.dat'))
+  save(cv_indices, file = paste0(result_path, 'cv_indices_', rr, '.dat'))
   rm(cv_indices)
 }
   

@@ -83,7 +83,7 @@ for (rr in 1  : repetitions) {
   
   alt_pred <- apply(mcmc$Ls, c(2, 3), mean)
   
-  save(alt_pred, file = paste0(save_path, 'alt_pred_', rr, '.dat'))
+  save(alt_pred, file = paste0(result_path, 'alt_pred_', rr, '.dat'))
   rm(alt_pred)
   
 }
