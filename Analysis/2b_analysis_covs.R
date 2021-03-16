@@ -12,10 +12,8 @@ source_path <- '~/Github/BiasedNetwork/R/'
 
 source(paste0(source_path, 'useful_functions.R'))
 source(paste0(source_path, 'UpdProbObs_function.R'))
-source('~/Github/Birds_and_plants/Simulations/functions/ModelCovariates_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/GenDataCovariates_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/PredPower_function.R')
-source('~/Github/Birds_and_plants/Simulations/functions/AllPredPower_function.R')
+source(paste0(source_path, 'ModelCovariates_function.R'))
+
 
 # --------------------------------------------------------------- #
 
