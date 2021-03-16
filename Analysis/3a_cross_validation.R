@@ -99,7 +99,7 @@ for (rr in 1  : repetitions) {
   
   # Saving the predictions:
   pred <- apply(mcmc$Ls, c(2, 3), mean)
-  save(pred, file = paste0(save_path, 'pred_', repetition, '.dat'))
+  save(pred, file = paste0(save_path, 'pred_', rr, '.dat'))
   rm(pred)
   
   # Saving the indices of interactions that were held out:
@@ -111,7 +111,7 @@ for (rr in 1  : repetitions) {
     col_ii <- ceiling(wh[ii] / nB)
     cv_indices[ii, ] <- c(row_ii, col_ii)
   }
-  save(cv_indices, file = paste0(save_path, 'cv_indices_', repetition, '.dat'))
+  save(cv_indices, file = paste0(save_path, 'cv_indices_', rr, '.dat'))
   rm(cv_indices)
 }
   
