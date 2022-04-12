@@ -33,14 +33,16 @@ source(paste0(source_path, 'GetPredWeights_function.R'))
 load(paste0(data_path, 'Cu.dat'))
 load(paste0(data_path, 'Cv.dat'))
 load(paste0(data_path, 'obs_A.dat'))
-load(paste0(data_path, 'obs_n.dat'))
 load(paste0(data_path, 'obs_W.dat'))
 load(paste0(data_path, 'obs_X.dat'))
+load(paste0(data_path, 'obs_F.dat'))
+load(paste0(data_path, 'obs_OB.dat'))
+load(paste0(data_path, 'obs_OP.dat'))
 
 # Sample sizes of the two sets of species:
 nB <- nrow(Cu)
 nP <- nrow(Cv)
-
+nStudies <- dim(obs_A)[3]
 
 # -------------- STEP 1: Specifications. ------------ #
 
@@ -77,8 +79,9 @@ for (cc in 1 : 3) {  # Chain index:
   set.seed(cc)
   
   # Running the method:
-  mcmc <- MCMC(obs_A = obs_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
-               Cu = Cu, Cv = Cv, Nsims = Nsims, burn = burn, thin = thin,
+  mcmc <- MCMC(obs_A = obs_A, focus = obs_F, occur_B = obs_OB, occur_P = obs_OP,
+               obs_X = obs_X, obs_W = obs_W, Cu = Cu, Cv = Cv,
+               Nsims = Nsims, burn = burn, thin = thin,
                use_H = use_H, bias_cor = bias_cor,
                theta_inf = theta_inf, mh_n_pis = mh_n_pis,
                mh_n_pjs = mh_n_pjs, mh_n_rho = mh_n_rho,
