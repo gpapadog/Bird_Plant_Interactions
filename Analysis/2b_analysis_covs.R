@@ -24,9 +24,11 @@ source(paste0(source_path, 'ModelCovariates_function.R'))
 load(paste0(data_path, 'Cu.dat'))
 load(paste0(data_path, 'Cv.dat'))
 load(paste0(data_path, 'obs_A.dat'))
-load(paste0(data_path, 'obs_n.dat'))
 load(paste0(data_path, 'obs_W.dat'))
 load(paste0(data_path, 'obs_X.dat'))
+load(paste0(data_path, 'obs_F.dat'))
+load(paste0(data_path, 'obs_OB.dat'))
+load(paste0(data_path, 'obs_OP.dat'))
 
 # Excluding the two variables with the highest missingness.
 # Convergence was poor when these covariates were incldued:
@@ -60,7 +62,8 @@ sampling <- NULL
 
 for (cc in 1 : 3) {
   
-  mcmc <- ModelCovariates(obs_A = obs_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
+  mcmc <- ModelCovariates(obs_A = obs_A, focus = obs_F, occur_B = obs_OB, occur_P = obs_OP,
+                          obs_X = obs_X, obs_W = obs_W,
                           Nsims = Nsims, burn = burn, thin = thin, bias_cor = bias_cor,
                           mh_n_pis = mh_n_pis, mh_n_pjs = mh_n_pjs, prior_mu0 = prior_mu0,
                           prior_sigmasq0 = prior_sigmasq0, prior_sigmasq = prior_sigmasq,
