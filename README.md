@@ -14,6 +14,14 @@ The link is provided at the references of this file. The downloaded file is a .c
 named ATLANTIC_frugivory.csv. The data set is also included in the Data/ folder along with a short
 data directory.
 
+For our analysis, we also acquire bird and plant phylogenies from publicly available sources.
+
+Bird phylogenies from the following website: https://birdtree.org. Go to the "Phylogeny subsets"
+tab, click on the "download full trees" link, click on "Stage 2". The file we use for the bird phylogenies is named "EricsonStage2_0001_1000.zip".
+
+Plant phylogenies are acquired using the V.PhyloMaker R package, and the code to do so is available
+in the Analysis/ folder under name 1c_phylo_plants.R.
+
 ## Code
 
 The folder HelperScripts/ includes functions that are used in the analysis code.
@@ -32,15 +40,20 @@ the data and processes them into matrices and data frames that can be used in su
 The processed data need to be saved to a local directory. That directory can be specified at the
 beginning of the code.
 
-- 1b_get_order.R: This code MUST be run in order to be able to plot the analysis results later.
+- 1b_phylo_birds.R This code MUST be run. It uses downloaded phylogenetic trees to acquire an
+estimate of the phylogenetic correlation matrix for the bird species.
+
+- 1b_phylo_plants.R This code MUST be run. It uses an existing R package to acquire an estimate
+of the phylogenetic correlation matrix for the plant species.
+
+- 1c_get_order.R: This code MUST be run in order to be able to plot the analysis results later.
 This code acquires the order with which the bird and plant species should be plotted if we want
 plotting to be ordered by taxonomic information. Getting the correct order is necessary in order
 to visually investigate whether posterior probabilities of interaction are taxonomically
 structured.
 
-- 2a_analysis.R: The main code for performing the analysis using the proposed method. We suggest
-running three chains of the MCMC in parallel. You will need to create a folder where analysis
-results should be saved.
+- 2a_analysis.R: The main code for performing the analysis using the proposed method. We ran four
+MCMC chains in parallel. You will need to create a folder where analysis results should be saved.
 
 - 2b_analysis_covs.R: The code for performing the analysis using the method that employs the
 covariates directly.
