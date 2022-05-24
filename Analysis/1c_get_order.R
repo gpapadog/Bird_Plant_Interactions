@@ -30,8 +30,8 @@ dta$Plant_family[dta$Plant_Species == 'Amaioua hybridus'] <- 'Rubiaceae'
 
 
 # Loading in the correlation matrices based on the original data:
-load(paste0(save_path, 'Cu.dat'))
-load(paste0(save_path, 'Cv.dat'))
+load(paste0(save_path, 'Cu_tax.dat'))
+load(paste0(save_path, 'Cv_tax.dat'))
 
 # Sample sizes
 nB <- nrow(Cu)
