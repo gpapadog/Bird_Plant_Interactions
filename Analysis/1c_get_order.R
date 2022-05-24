@@ -29,9 +29,19 @@ dta <- fread(paste0(data_path, 'ATLANTIC_frugivory.csv'))
 dta$Plant_family[dta$Plant_Species == 'Amaioua hybridus'] <- 'Rubiaceae'
 
 
-# Loading in the correlation matrices based on the original data:
+# Loading the names of the bird species that should be kept
+# Look at 1b_phylo_birds.R for the reason why we drop 10 species (they are not
+# species, they are genus)
+load(paste0(save_path, 'birds_232.dat'))
+
+# Loading in the correlation matrices based on the original data.
+# These matrices inform us of which species belong to the same genus etc.
 load(paste0(save_path, 'Cu_tax.dat'))
 load(paste0(save_path, 'Cv_tax.dat'))
+
+# Keeping the 232 bird species:
+wh_keep <- which(rownames(Cu) %in% birds_232)
+Cu <- Cu[wh_keep, wh_keep]
 
 # Sample sizes
 nB <- nrow(Cu)
@@ -109,7 +119,7 @@ for (ii in 1 : nB) {
 # re-ordered data, species will be taxonomically clustered.
 bird_order <- order(groupings[3, ])
 if (save_files) {
-  save(bird_order, file = paste0(save_path, 'bird_order.dat'))
+  save(bird_order, file = paste0(save_path, 'bird_order_232.dat'))
 }
 
 # Plotting the re-ordered correlation matrix to make sure that our ordering
@@ -127,7 +137,7 @@ family_info <- dta[, list(Frug_Order = Frug_Order[1],
                           Frug_Genus = Frug_Genus[1]), by = Frugivore_Species]
 bird_order_info <- merge(bird_order_info, family_info, by.x = 'Species', by.y = 'Frugivore_Species', sort = FALSE)
 if (save_files) {
-  save(bird_order_info, file = paste0(save_path, 'bird_order_info.dat'))
+  save(bird_order_info, file = paste0(save_path, 'bird_order_info_232.dat'))
 }
 
 
