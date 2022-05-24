@@ -21,6 +21,11 @@ source(paste0(source_path, 'useful_functions.R'))
 # Loading the data:
 load(paste0(data_path, 'obs_W.dat'))
 load(paste0(data_path, 'obs_X.dat'))
+load(paste0(data_path, 'birds_232.dat'))
+
+wh_keep <- which(rownames(obs_X) %in% birds_232)
+obs_X <- obs_X[wh_keep, ]
+
 
 # Getting the sample sizes:
 nB <- nrow(obs_X)
@@ -31,7 +36,7 @@ nP <- nrow(obs_W)
 # --------------- STEP 1: Getting the results together ----------------- #
 
 # MCMC chains saved:
-nchains <- 3
+nchains <- 4
 
 # Putting together the predictions from the chains:
 all_pred <- NULL
@@ -45,7 +50,7 @@ Nsims <- dim(all_pred[[1]])[1]
 
 # Using the linear predictor of the interaction model:
 mod_pL1s <- array(NA, dim = c(nchains * Nsims, nB, nP))
-for (cc in 1 : 3) {
+for (cc in 1 : nchains) {
   wh_entries <- Nsims * (cc - 1) + 1 : Nsims
   mod_pL1s[wh_entries, , ] <- all_pred[[cc]][, , , 2]
 }
