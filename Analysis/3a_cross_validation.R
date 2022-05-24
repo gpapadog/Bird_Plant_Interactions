@@ -30,16 +30,37 @@ source(paste0(source_path, 'GetPredWeights_function.R'))
 # --------------------------------------------------------------- #
 
 # Loading the data:
-load(paste0(data_path, 'Cu.dat'))
-load(paste0(data_path, 'Cv.dat'))
+load(paste0(data_path, 'Cu_phylo.dat'))
+load(paste0(data_path, 'Cv_phylo.dat'))
 load(paste0(data_path, 'obs_A.dat'))
-load(paste0(data_path, 'obs_n.dat'))
 load(paste0(data_path, 'obs_W.dat'))
 load(paste0(data_path, 'obs_X.dat'))
+load(paste0(data_path, 'obs_F.dat'))
+load(paste0(data_path, 'obs_OB.dat'))
+load(paste0(data_path, 'obs_OP.dat'))
+load(paste0(data_path, 'birds_232.dat'))
+
+Cu <- Cu_phylo
+Cv <- Cv_phylo
+
+# Restricting to the birds with species information:
+wh_keep <- which(rownames(obs_A) %in% birds_232)
+obs_A <- obs_A[wh_keep, , ]
+obs_F <- obs_F[wh_keep, , ]
+obs_OB <- obs_OB[wh_keep, ]
+obs_X <- obs_X[wh_keep, ]
 
 # Sample sizes of the two sets of species:
 nB <- nrow(Cu)
 nP <- nrow(Cv)
+nS <- dim(obs_A)[3]
+print(c(nB, nP, nS))
+
+
+# Getting the combined network for the interactions recorded in any study
+comb_A <- apply(obs_A, c(1, 2), sum)
+comb_A <- (comb_A > 0) * 1
+
 
 
 # -------------- STEP 1: Specifications. ------------ #
@@ -70,27 +91,44 @@ sampling <- NULL
 
 # ------------- STEP 2: Setting some interactions to out of sample ------------ #
 
-# We highly recommend running the following code in parallel on 20 machines.
+# We highly recommend running the following code in parallel on 30 machines.
 
-repetitions <- 20
+repetitions <- 30
 
 
 for (rr in 1  : repetitions) {
   
   set.seed(rr)
   
-  # Matrix that chooses 100 recorded interactions:
+  # Matrix that chooses 100 recorded interactions to be held-out.
   set_out <- matrix(0, nrow = nB, ncol = nP)
-  set_out[sample(which(obs_A == 1), 100)] <- 1  
+  set_out[sample(which(comb_A == 1), 100)] <- 1
   
   # Zero-ing out corresponding entries in A.
   use_A <- obs_A
   use_A[which(set_out == 1)] <- 0  
   
-
+  # Getting the indices that were zero-ed out.
+  cv_indices <- matrix(NA, nrow = 100, ncol = 2)
+  wh <- which(set_out == 1)
+  for (ii in 1 : 100) {
+    row_ii <- wh[ii] %% nB
+    row_ii <- ifelse(row_ii == 0, nB, row_ii)
+    col_ii <- ceiling(wh[ii] / nB)
+    cv_indices[ii, ] <- c(row_ii, col_ii)
+  }
+  
+  # Zero-ing out corresponding entries in A.
+  use_A <- obs_A
+  for (ii in 1 : 100) {
+    use_A[cv_indices[ii, 1], cv_indices[ii, 2], ] <- 0
+  }
+  
   # Running the MCMC with the new recorded interaction matrix:
-  mcmc <- MCMC(obs_A = use_A, obs_n = obs_n, obs_X = obs_X, obs_W = obs_W,
-               Cu = Cu, Cv = Cv, Nsims = Nsims, burn = burn, thin = thin,
+  set.seed(rr)
+  mcmc <- MCMC(obs_A = use_A, focus = obs_F, occur_B = obs_OB, occur_P = obs_OP,
+               obs_X = obs_X, obs_W = obs_W, Cu = Cu, Cv = Cv,
+               Nsims = Nsims, burn = burn, thin = thin,
                use_H = use_H, bias_cor = bias_cor,
                theta_inf = theta_inf, mh_n_pis = mh_n_pis,
                mh_n_pjs = mh_n_pjs, mh_n_rho = mh_n_rho,
@@ -105,15 +143,7 @@ for (rr in 1  : repetitions) {
   save(pred, file = paste0(result_path, 'pred_', rr, '.dat'))
   rm(pred)
   
-  # Saving the indices of interactions that were held out:
-  cv_indices <- matrix(NA, nrow = 100, ncol = 2)
-  wh <- which(set_out == 1)
-  for (ii in 1 : 100) {
-    row_ii <- wh[ii] %% nB
-    row_ii <- ifelse(row_ii == 0, nB, row_ii)
-    col_ii <- ceiling(wh[ii] / nB)
-    cv_indices[ii, ] <- c(row_ii, col_ii)
-  }
+  
   save(cv_indices, file = paste0(result_path, 'cv_indices_', rr, '.dat'))
   rm(cv_indices)
 }
