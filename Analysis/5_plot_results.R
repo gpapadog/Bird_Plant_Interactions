@@ -13,26 +13,36 @@ library(superheat)
 library(abind)
 library(gridExtra)
 library(grid)
+
 setwd(wd_path)
 
 # Loading the data:
-load(paste0(data_path, 'Cu.dat'))
-load(paste0(data_path, 'Cv.dat'))
-load(paste0(data_path, 'bird_order.dat'))
-load(paste0(data_path, 'bird_order_info.dat'))
+load(paste0(data_path, 'bird_order_232.dat'))
+load(paste0(data_path, 'bird_order_info_232.dat'))
 load(paste0(data_path, 'plant_order.dat'))
 load(paste0(data_path, 'plant_order_info.dat'))
 load(paste0(data_path, 'obs_A.dat'))
 load(paste0(data_path, 'obs_X.dat'))
 load(paste0(data_path, 'obs_W.dat'))
+load(paste0(data_path, 'birds_232.dat'))
+
+# Restricting to the analysis of the 232 bird species:
+wh_keep <- which(rownames(obs_A) %in% birds_232)
+obs_A <- obs_A[wh_keep, , ]
+obs_X <- obs_X[wh_keep, ]
+
+# The combined network:
+comb_A <- apply(obs_A, c(1, 2), sum)
+comb_A <- (comb_A > 0) * 1
 
 nB <- nrow(obs_A)
 nP <- ncol(obs_A)
 
-# Number of MCMC chains:
-nchains <- 3
+# Number of MCMC chains for our method and for the alternative method:
+nchains <- 4
+nchains_alt <- 3
 # Number of cross validation repetitions:
-repetitions <- 20
+repetitions <- 30
 
 # Covariate names that are nicer for plotting:
 good_namesX <- c('Body Mass', 'Gape Size', 'Large*', 'Fruit\nDependent*', 'Endangered*')
@@ -50,7 +60,7 @@ for (ii in 1 : nchains) {
 }
 
 alt_res <- NULL
-for (ii in 1 : nchains) {
+for (ii in 1 : nchains_alt) {
   load(paste0(result_path, 'alt_res_', ii, '.dat'))
   alt_res[[ii]] <- res
 }
@@ -68,12 +78,12 @@ for (ii in 1 : nchains) {
 use_Nsims <- dim(all_res[[1]]$all_pred)[1]
 
 # Creating an array to bind results across chains:
-pred_ours <- array(NA, dim = c(nchains * use_Nsims, nrow(Cu), nrow(Cv)))
+pred_ours <- array(NA, dim = c(nchains * use_Nsims, nB, nP))
 for (ii in 1 : nchains) {
   # Using the posterior samples of the L matrix:
   pred_ours[1 : use_Nsims + use_Nsims * (ii - 1), , ] <- all_res[[ii]]$all_pred[, , , 1]
 }
-dimnames(pred_ours)[2 : 3] <- list(bird = rownames(Cu), plant = rownames(Cv))
+dimnames(pred_ours)[2 : 3] <- list(bird = rownames(obs_A), plant = colnames(obs_A))
 
 # Calculating the posterior probability of interaction by averaging across
 # posterior samples:
@@ -87,19 +97,19 @@ pred_ours <- apply(pred_ours, c(2, 3), mean)
 use_Nsims <- dim(alt_res[[1]]$all_pred)[1]
 
 # Creating an array to bind results across chains:
-pred_alt <- array(NA, dim = c(nchains * use_Nsims, nrow(Cu), nrow(Cv)))
-for (ii in 1 : nchains) {
+pred_alt <- array(NA, dim = c(nchains_alt * use_Nsims, nB, nP))
+for (ii in 1 : nchains_alt) {
   # Using the posterior samples of the L matrix:
   pred_alt[1 : use_Nsims + use_Nsims * (ii - 1), , ] <- alt_res[[ii]]$all_pred[, , , 1]
 }
-dimnames(pred_alt)[2 : 3] <- list(bird = rownames(Cu), plant = rownames(Cv))
+dimnames(pred_alt)[2 : 3] <- list(bird = rownames(obs_A), plant = colnames(obs_A))
 # Posterior probability of interaction:
 pred_alt <- apply(pred_alt, c(2, 3), mean)
 
 
 # Setting the recorded interactions to NA (so that they dont overpower the colors)
-pred_ours[obs_A == 1] <- NA
-pred_alt[obs_A == 1] <- NA
+pred_ours[comb_A == 1] <- NA
+pred_alt[comb_A == 1] <- NA
 
 # Re-ordering according to the bird and plant order (in order to plot along
 # taxonomic information)
@@ -126,30 +136,16 @@ plant_size_cluster <- sapply(unique(plant_group), function(x) sum(plant_group ==
 plot_pred <- pred_ours
 
 # Set the minimum cluster size that should be plotted. For the results of the
-# manuscript, we set min_bird_size to 5, and min_plant_size to 8. Setting both
+# manuscript, we set min_bird_size to 10, and min_plant_size to 20. Setting both
 # to 0 will produce the full results.
-min_bird_size <- 5
-min_plant_size <- 8
+min_bird_size <- 10
+min_plant_size <- 20
 
 keep_bird_groups <- names(which(bird_size_cluster >= min_bird_size))
 keep_plant_groups <- names(which(plant_size_cluster >= min_plant_size))
 
 keep_bird_index <- which(bird_group %in% keep_bird_groups)
 keep_plant_index <- which(plant_group %in% keep_plant_groups)
-
-
-# Plotting all species and families:
-superheat(plot_pred, membership.rows = bird_group, membership.cols = plant_group,
-          grid.hline.col = "#00257D", grid.vline.col = '#00257D',
-          grid.hline.size = 0.3, grid.vline.size = 0.3,
-          bottom.label.text.angle = 90,
-          left.label.text.size = ifelse(bird_size_cluster > 5, 3, ifelse(bird_size_cluster > 3, 2, 0)),
-          bottom.label.text.size = ifelse(plant_size_cluster > 7, 3, ifelse(plant_size_cluster > 5, 2, 0)),
-          bottom.label.size = 0.2, left.label.size = 0.12,
-          legend.breaks = seq(0, 1, by = 0.2),
-          legend.vspace = 0.05,
-          heat.col.scheme = "grey", heat.na.col = 'black',
-          heat.pal.values = seq(0, 1, by = 0.05))
 
 
 # Plotting those with minimum size as specified:
@@ -339,7 +335,7 @@ ggplot() + geom_tile(aes(x = covariate, y = y, fill = value), color = 'white', d
 # and setting the recorded interactions to NA:
 use_Ls <- do.call(abind, c(lapply(all_res, function(x) x$all_pred[, , , 1]), along = 1))
 use_mean_Ls <- apply(use_Ls, c(2, 3), mean)
-use_mean_Ls[obs_A == 1] <- NA
+use_mean_Ls[comb_A == 1] <- NA
 
 # Which covariate is to be plotted. The ones we want are listed first.
 wh_X <- 1
