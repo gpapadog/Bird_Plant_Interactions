@@ -30,14 +30,28 @@ source(paste0(source_path, 'GetPredWeights_function.R'))
 # --------------------------------------------------------------- #
 
 # Loading the data:
-load(paste0(data_path, 'Cu.dat'))
-load(paste0(data_path, 'Cv.dat'))
+load(paste0(data_path, 'Cu_phylo.dat'))
+load(paste0(data_path, 'Cv_phylo.dat'))
 load(paste0(data_path, 'obs_A.dat'))
 load(paste0(data_path, 'obs_W.dat'))
 load(paste0(data_path, 'obs_X.dat'))
 load(paste0(data_path, 'obs_F.dat'))
 load(paste0(data_path, 'obs_OB.dat'))
 load(paste0(data_path, 'obs_OP.dat'))
+load(paste0(data_path, 'birds_232.dat'))
+
+Cu <- Cu_phylo
+Cv <- Cv_phylo
+
+# Note that for the analysis in the appendix we used the Cu_tax and Cv_tax
+# correlation matrices.
+
+# Restricting to the analysis of the 232 bird species:
+wh_keep <- which(rownames(obs_A) %in% birds_232)
+obs_A <- obs_A[wh_keep, , ]
+obs_F <- obs_F[wh_keep, , ]
+obs_OB <- obs_OB[wh_keep, ]
+obs_X <- obs_X[wh_keep, ]
 
 # Sample sizes of the two sets of species:
 nB <- nrow(Cu)
@@ -72,9 +86,9 @@ sampling <- NULL
 
 # --------------- STEP 2: MCMC. ----------------- #
 
-# We run 3 chains. We suggest that you run the following code in parallel.
+# We run 4 chains. We suggest that you run the following code in parallel instead.
 
-for (cc in 1 : 3) {  # Chain index:
+for (cc in 1 : 4) {  # Chain index:
   
   set.seed(cc)
   
