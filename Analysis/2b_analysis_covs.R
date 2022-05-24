@@ -21,21 +21,28 @@ source(paste0(source_path, 'ModelCovariates_function.R'))
 # --------------------------------------------------------------- #
 
 # Loading the data:
-load(paste0(data_path, 'Cu.dat'))
-load(paste0(data_path, 'Cv.dat'))
 load(paste0(data_path, 'obs_A.dat'))
 load(paste0(data_path, 'obs_W.dat'))
 load(paste0(data_path, 'obs_X.dat'))
 load(paste0(data_path, 'obs_F.dat'))
 load(paste0(data_path, 'obs_OB.dat'))
 load(paste0(data_path, 'obs_OP.dat'))
+load(paste0(data_path, 'birds_232.dat'))
 
 # Excluding the two variables with the highest missingness.
 # Convergence was poor when these covariates were incldued:
 obs_W <- obs_W[, - c(4, 12)]
 
-nB <- nrow(Cu)
-nP <- nrow(Cv)
+# Restricting to the analysis of the 232 bird species:
+wh_keep <- which(rownames(obs_A) %in% birds_232)
+obs_A <- obs_A[wh_keep, , ]
+obs_F <- obs_F[wh_keep, , ]
+obs_OB <- obs_OB[wh_keep, ]
+obs_X <- obs_X[wh_keep, ]
+
+
+nB <- nrow(obs_A)
+nP <- nrow(obs_A)
 
 # -------------- STEP 1: Specifications. ------------ #
 
