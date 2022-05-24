@@ -27,6 +27,8 @@ library(gplots)
 
 # Loading in the data set.
 dta <- fread(paste0(data_path, 'ATLANTIC_frugivory.csv'))
+# Studies with the same reference but different method are treated separately:
+dta$Study_combined <- sapply(1 : nrow(dta), function(r) paste(dta$`Study reference`[r], '-', dta$Study_Method[r]))
 
 # Correcting recorded coordinates. Some entries have recorded coordinates that
 # are not correct as they are not in Brazil. These coordinates are set to NA.
@@ -77,57 +79,40 @@ birds <- subset(dta, Frug_Class == 'Aves')
 dta_subset <- subset(dta, `Study reference` %in% birds$`Study reference`)
 
 # Keeping track of the unique bird and plant species in the study, and their
-# number.
+# number. Also keeping track of the unique studies.
 uni_birds <- unique(birds$Frugivore_Species)
 uni_plants <- unique(dta_subset$Plant_Species)
+uni_studies <- unique(birds$Study_combined)
 nB <- length(uni_birds)
 nP <- length(uni_plants)
-cat(nB, nP)
+nS <- length(uni_studies)
+cat(nB, nP, nS)
+# 85 unique studies, but 2 of them are both species oriented and network
+# studies, so that amounts to 87 networks.
 
 
-# ------ PART C: Observed interaction and number of studies arrays -------- #
+# ------ PART C: Array of observed interactions -------- #
 
-# Creating a matrix that has rows corresponding to birds and columns
-# corresponding to plants. Entries in the matrix are equal to 0 if the species
-# have not been recorded to interact, and equal to 1 if an interaction has been
-# recorded in any study.
+# Creating an array with dimensions that correspond to birds, plants and
+# studies. Entries are equal to 0 if the species did not interact in the
+# specific study, and equal to 1 if they were recorded to interact.
 #
-obs_A <- matrix(0, nrow = nB, ncol = nP, dimnames = list(uni_birds, uni_plants))
+obs_A <- array(0, dim = c(nB, nP, nS))
+dimnames(obs_A) <- list(uni_birds, uni_plants, uni_studies)
 for (ss in 1 : nrow(birds)) {
   wh1 <- which(uni_birds == birds$Frugivore_Species[ss])
   wh2 <- which(uni_plants == birds$Plant_Species[ss])
-  obs_A[wh1, wh2] <- 1
+  wh3 <- which(uni_studies == birds$Study_combined[ss])
+  obs_A[wh1, wh2, wh3] <- 1
 }
-# Plotting a heatmap of the recorded interactions:
-heatmap.2(obs_A, dendrogram = 'none', trace = 'none', Rowv = FALSE, Colv = FALSE)
-# Saving the binary matrix of recorded interactions.
+# Plotting a heatmap of the recorded interactions for a single study,
+# and across all studies:
+heatmap.2(obs_A[, , 1], dendrogram = 'none', trace = 'none', Rowv = FALSE, Colv = FALSE)
+heatmap.2(apply(obs_A, c(1, 2), function(x) any(x == 1) * 1), dendrogram = 'none', trace = 'none', Rowv = FALSE, Colv = FALSE)
+# Saving the binary array of recorded interactions.
 if (save_files) {
   save(obs_A, file = paste0(save_path, 'obs_A.dat'))
 }
-
-
-# Creating a matrix that has rows corresponding to birds and columns
-# corresponding to plants. Entries in the matrix count the number of studies
-# that recorded at least one interaction for both species. This matrix
-# essentially represents a count for the number of opportunities to record a
-# given bird-plant interaction.
-#
-obs_n <- matrix(0, nrow = nB, ncol = nP, dimnames = list(uni_birds, uni_plants))
-# Creating a list of studies that included each bird and plant species:
-studies_birds <- lapply(uni_birds, function(x) unique(subset(dta_subset, Frugivore_Species == x)$`Study reference`))
-studies_plants <- lapply(uni_plants, function(x) unique(subset(dta_subset, Plant_Species == x)$`Study reference`))
-# For each pair of species, count the number of overlapping studies:
-for (ii in 1 : nB) {
-  for (jj in 1 : nP) {
-    obs_n[ii, jj] <- length(intersect(studies_birds[[ii]], studies_plants[[jj]]))
-  }
-}
-# Visualizing the number of studies that could have recorded an interaction.
-heatmap.2(obs_n, dendrogram = 'none', trace = 'none', Rowv = FALSE, Colv = FALSE)
-if (save_files) {
-  save(obs_n, file = paste0(save_path, 'obs_n.dat'))
-}
-
 
 
 # ------ PART D: Covariates and correlation matrices -------- #
@@ -162,7 +147,15 @@ cat(nB, dim(all_X)[1])
 sum(all_X$Frugivore_Species != dimnames(obs_A)[[1]])  # Should be equal to 0.
 
 
-# Creating the correlation matrix for the set of birds.
+# Creating the correlation matrix for the set of birds based on TAXONOMY.
+# This correlation matrix is used in 1b_get_order.R to acquire the order
+# of species in our data based on their taxonomic order.
+#
+# The phylogeny-based correlation matrix is created in a separate file.
+# We use the phylogeny-based correlation matrix in the manuscript for the
+# analysis of the interaction data. So this taxonomic correlation matrix is
+# not used directly for our analysis.
+#
 # If the birds are in the same genus, family or order, the correlation is set
 # to 0.75, 0.5, and 0.25, respectively.
 #
@@ -187,9 +180,8 @@ for (i1 in 1 : (nB - 1)) {
 heatmap.2(Cu, dendrogram = 'none', trace = 'none', Rowv = FALSE, Colv = FALSE)
 # Saving it to our data information:
 if (save_files) {
-  save(Cu, file = paste0(save_path, 'Cu.dat'))
+  save(Cu, file = paste0(save_path, 'Cu_tax.dat'))
 }
-
 
 
 # Excluding phylogenetic information from the matrix of covariates:
@@ -247,8 +239,9 @@ cat(nP, dim(all_W)[1])
 sum(all_W$Plant_Species != dimnames(obs_A)[[2]])  # Should be 0.
 
 
-# Creating the phylogenetic correlation matrix for the second set of species.
+# Creating the taxonomic correlation matrix for the second set of species.
 # The correlation is 0.5 and 0.25 for the same genus and family, respectively.
+# Again, the phylogenetic correlation matrix is created in a separate file.
 #
 Cv <- diag(nP)
 dimnames(Cv) <- list(uni_plants, uni_plants)
@@ -267,12 +260,10 @@ for (i1 in 1 : (nP - 1)) {
 
 heatmap.2(Cv, dendrogram = 'none', trace = 'none', Rowv = FALSE, Colv = FALSE)
 if (save_files) {
-  save(Cv, file = paste0(save_path, 'Cv.dat'))
+  save(Cv, file = paste0(save_path, 'Cv_tax.dat'))
 }
 
 
-
-# Creating the covariate matrix for the second set of species.
 
 # Exclude phylogenetic information (we don't need it anymore).
 all_W[, c('Plant_family', 'Plant_genus') := NULL]
@@ -308,6 +299,75 @@ colnames(obs_W) <- c('logFruitDiam', 'logFruitLen', 'LogSeedDiam', 'LogSeedLen',
 if (save_files) {
   save(obs_W, file = paste0(save_path, 'obs_W.dat'))
 }
+
+
+
+
+# ------ PART E: Focus and species occurrence across studies -------- #
+
+
+# Creating two arrays that correspond to whether the studies would have
+# recorded an observed interaction or not, and whether species co-occur in the
+# study area. We will assume that these arrays are 0/1. For the focus array,
+# this makes sense as we have access to whether the study is animal or plant
+# focused or a network study. For the species occurrence, we know for a fact
+# that a species with a recorded interaction occurs in the area. The only
+# simplifying assumption is therefore when we set probability of occurrence to
+# zero for species without any recorded interaction.
+#
+
+# First for study focus:
+obs_F <- array(0, dim = c(nB, nP, nS))
+dimnames(obs_F) <- list(uni_birds, uni_plants, uni_studies)
+
+for (ss in 1 : nS) {
+  wh_study <- uni_studies[ss]
+  study_method <- unique(birds$Study_Method[birds$Study_combined == wh_study])
+  if (length(study_method) > 1) {
+    cat('Error. Each study should have a single method.')
+  }
+  # If this includes a network study, then create the most general focus matrix.
+  if (study_method == 'Network study') {
+    obs_F[, , ss] <- 1
+  } else if (study_method == 'Animal-oriented') {
+    these_birds <- unique(birds$Frugivore_Species[birds$Study_combined == wh_study])
+    wh_birds <- which(uni_birds %in% these_birds)
+    obs_F[wh_birds, , ss] <- 1
+  } else if (study_method == 'Plant-oriented') {
+    these_plants <- unique(birds$Plant_Species[birds$Study_combined == wh_study])
+    wh_plants <- which(uni_plants %in% these_plants)
+    obs_F[, wh_plants, ss] <- 1
+  } else {
+    cat('Error')
+  }
+}
+
+if (save_files) {
+  save(obs_F, file = paste0(save_path, 'obs_F.dat'))
+}
+
+
+# For occurrence of network study
+obs_OB <- array(0, dim = c(nB, nS))
+obs_OP <- array(0, dim = c(nP, nS))
+dimnames(obs_OB) <- list(uni_birds, uni_studies)
+dimnames(obs_OP) <- list(uni_plants, uni_studies)
+
+for (ss in 1 : nS) {
+  wh_study <- uni_studies[ss]
+  these_birds <- unique(birds$Frugivore_Species[birds$Study_combined == wh_study])
+  these_plants <- unique(birds$Plant_Species[birds$Study_combined == wh_study])
+  wh_birds <- which(uni_birds %in% these_birds)
+  wh_plants <- which(uni_plants %in% these_plants)
+  obs_OB[wh_birds, ss] <- 1
+  obs_OP[wh_plants, ss] <- 1
+}
+
+if (save_files) {
+  save(obs_OB, file = paste0(save_path, 'obs_OB.dat'))
+  save(obs_OP, file = paste0(save_path, 'obs_OP.dat'))
+}
+
 
 
 
