@@ -81,3 +81,7 @@ Bufalo, F., Labecca, F., Pedrosa, F., Constantini, R., Emer, C., Silva, W.
 R., da Silva, F. R., Ovaskainen, O., & Jordano, P. (2017). Atlantic frugivory:
 A plant-frugivore interaction data set for the Atlantic Forest.
 Ecology, 98(6), 1729. https://doi.org/10.1002/ecy.1818
+
+## Acknowledgements
+
+This project has received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation programme (grant agreement No 856506; ERC-synergy project LIFEPLAN)
