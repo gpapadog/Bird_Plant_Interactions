@@ -75,7 +75,7 @@ mh_n_rho <- 100
 stick_alpha <- 5
 prior_theta <- c(1, 1)
 prior_tau <- c(5, 5)
-prior_rho <- c(5, 5)  # I do not update this for now.
+prior_rho <- c(5, 5)
 prior_mu0 <- 0
 prior_sigmasq0 <- 10
 prior_sigmasq <- c(1, 1)
